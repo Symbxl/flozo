@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+/*
+ * One palette, two schemes. Every colour on the site is a token here, so a
+ * component only ever names a role (`surface`, `line`, `muted`, `brand`) and
+ * the scheme decides what that role looks like.
+ */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #14131c;
+
+  /* Cards and inputs sit on top of the page, not in it. */
+  --surface: #ffffff;
+  --surface-muted: #f5f5f8;
+  --line: rgb(12 10 30 / 0.09);
+  --line-strong: rgb(12 10 30 / 0.16);
+
+  --muted: #55546a;
+  --faint: #7c7b90;
+
+  --brand: #8b31ff;
+  --brand-bright: #7a1fff;
+  --live: #e8113c;
+
+  /* Decorative only: the glow and grid behind the page. */
+  --wash-brand: rgb(145 70 255 / 0.16);
+  --wash-live: rgb(232 17 60 / 0.05);
+  --grid: rgb(12 10 30 / 0.045);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #08070d;
+    --foreground: #f3f2f8;
+
+    --surface: #0f0e17;
+    --surface-muted: #16151f;
+    --line: rgb(255 255 255 / 0.09);
+    --line-strong: rgb(255 255 255 / 0.18);
+
+    --muted: #a3a1b5;
+    --faint: #6e6c81;
+
+    --brand: #9146ff;
+    --brand-bright: #c9adff;
+    --live: #ff3355;
+
+    --wash-brand: rgb(145 70 255 / 0.3);
+    --wash-live: rgb(255 51 85 / 0.1);
+    --grid: rgb(255 255 255 / 0.035);
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-bright: var(--brand-bright);
+  --color-live: var(--live);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 30%, transparent);
+}
+
+/*
+ * Fixed behind everything: a purple wash bleeding down from the header and a
+ * grid that fades out before it reaches the content. Cheap (no extra paint on
+ * scroll) and it keeps the page from reading as a flat sheet of black.
+ */
+.page-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(75rem 38rem at 50% -16rem, var(--wash-brand), transparent 65%),
+    radial-gradient(45rem 28rem at 100% 8%, var(--wash-live), transparent 70%);
+}
+
+.page-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 3.5rem 3.5rem;
+  -webkit-mask-image: radial-gradient(55rem 34rem at 50% -4rem, #000, transparent 72%);
+  mask-image: radial-gradient(55rem 34rem at 50% -4rem, #000, transparent 72%);
+}
+
+/* Written as CSS rather than utilities: `background-clip: text` needs the
+   gradient and the transparent fill to travel together. */
+.text-gradient {
+  background-image: linear-gradient(
+    104deg,
+    var(--foreground) 26%,
+    var(--brand-bright) 96%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Brand-coloured halo, used behind the player and the primary buttons. */
+.brand-halo {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--brand) 22%, transparent),
+    0 18px 60px -24px color-mix(in srgb, var(--brand) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
